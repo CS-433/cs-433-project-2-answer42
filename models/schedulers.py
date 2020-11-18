@@ -54,7 +54,7 @@ class PaperScheduler(torch.optim.lr_scheduler._LRScheduler):
         for lr in self.base_lrs:
             if self.last_epoch >= int(0.5 * self.num_epochs):
                 lr *= 0.1
-            elif self.last_epoch >= int(0.75 * self.num_epochs):
-                lr *= 0.01
+            if self.last_epoch >= int(0.75 * self.num_epochs):
+                lr *= 0.1
             res.append(lr)
         return res

@@ -114,6 +114,7 @@ class TrainableModel(AbstractModel):
                 self.parameters(),
                 lr=self.hparams.lr,
                 weight_decay=self.hparams.weight_decay,
+                momentum=0.9,
             )
         else:
             NotImplementedError

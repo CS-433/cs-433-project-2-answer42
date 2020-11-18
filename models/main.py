@@ -57,12 +57,13 @@ class BasicSupervised(base.TrainableModel):
             num_workers=self.hparams.workers,
             pin_memory=True,
             batch_size=self.hparams.batch_size,
+            shuffle=True,
         )
         self.test_loader = torch.utils.data.DataLoader(
             self.testset,
             num_workers=self.hparams.workers,
             pin_memory=True,
-            batch_size=self.hparams.batch_size,
+            batch_size=512,
         )
 
         return self.train_loader, self.test_loader
