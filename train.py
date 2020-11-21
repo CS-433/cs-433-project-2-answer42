@@ -24,15 +24,22 @@ warnings.simplefilter("ignore")
 
 
 def add_learner_params(parser):
+    # TODO: Add help to arguments that does not yet have it
     parser.add_argument('--name', default='')
-    parser.add_argument('--model', default='')
-    parser.add_argument('--ckpt', default='')
-    parser.add_argument('--eval_only', type=bool, default=False)
+    parser.add_argument('--model', default='',
+        help='Name of the model to train [the model\'s name should be in to \
+REGISTERED_MODELS dictionary in models package]')
+    parser.add_argument('--ckpt', default='', 
+        help='Path to checkpoint file to continue training from it')
+    parser.add_argument('--eval_only', action='store_true')
     # trainer params
-    parser.add_argument('--epochs', type=int, default=1)
+    parser.add_argument('--epochs', type=int, default=1,
+        help='Number of training epochs')
     parser.add_argument('--val_iters', type=int, default=1)
-    parser.add_argument('--save_freq', default=1, type=int)
-    parser.add_argument('--eval_freq', default=1, type=int)
+    parser.add_argument('--save_freq', default=1, type=int,
+        help='Number of epochs between each checkpoint save of the model')
+    parser.add_argument('--eval_freq', default=1, type=int,
+        help='Number of epochs between each evaluation of the model')
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--data_seed', default=0, type=int)
 
