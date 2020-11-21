@@ -27,7 +27,7 @@ def add_learner_params(parser):
     # TODO: Add help to arguments that does not yet have it
     parser.add_argument('--name', default='')
     parser.add_argument('--model', default='',
-        help='Name of the model to train [the model\'s name should be in to \
+        help='Name of the model to train [the model\'s name should be in \
 REGISTERED_MODELS dictionary in models package]')
     parser.add_argument('--ckpt', default='', 
         help='Path to checkpoint file to continue training from it')
