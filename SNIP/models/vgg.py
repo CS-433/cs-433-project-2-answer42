@@ -50,6 +50,7 @@ def vgg19(dataset):
     affine = False
     NETS = {
         'cifar10': lambda: VGG(3, 10, depth, batch_norm, affine)
-        'cifar100': lambda: VGG(3, 10, depth, batch_norm, affine),
-        'tinyimagenet': lambda: VGG(3, 10, depth, batch_norm, affine)
+        'cifar100': lambda: VGG(3, 100, depth, batch_norm, affine),
+        'tinyimagenet': lambda: VGG(3, 200, depth, batch_norm, affine)
     }
+    return NETS[dataset]()

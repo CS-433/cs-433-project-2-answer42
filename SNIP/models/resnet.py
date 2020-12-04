@@ -99,6 +99,6 @@ def resnet32(dataset):
     NETS = {
         'cifar10': lambda: ResNet(3, 10, 32),
         'cifar100': lambda: ResNet(3, 100, 32),
-        'tinyimagenet': lambda: ResNet(3, 10, 32)
+        'tinyimagenet': lambda: ResNet(3, 200, 32)
     }
     return NETS[dataset]()
