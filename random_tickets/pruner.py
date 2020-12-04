@@ -160,7 +160,7 @@ def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_clas
     return keep_masks
 
 
-def random_ticket(net, L, ratio, vgg_scaling=False):
+def random_ticket(net, L, ratio, vgg_scaling=False, last_ratio=0.3):
     old_net = net
     n_params = np.array([m.weight.shape.numel() for m in net.modules() if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear)])
 
@@ -169,11 +169,17 @@ def random_ticket(net, L, ratio, vgg_scaling=False):
         p = ((L - p + 1)**2 + (L - p + 1)) / p**2
     else:
         p = (L - p + 1)**2 + (L - p + 1)
-    
-    p = (p * n_params) / ((1 - ratio) * n_params.sum())
-    p /= p.sum()
-    assert p.sum() == 1
-    print(f'===> smart ratios: {p}')
+
+    p /= ((p * n_params) / ((1 - ratio) * n_params.sum() - last_ratio * n_params[-1])).sum()
+    p[-1] = last_ratio
+    print(f'===> smart ratios before rearanging:', ', '.join([f"{x:.3f}" for x in p]))
+    for i in range(len(p)):
+        if p[i] > 1.:
+            p[i + 1] = p[i+1] + (p[i] - 1) * n_params[i] / n_params[i+1]
+            p[i] = 1
+    print(f'===> smart ratios:', ', '.join([f"{x:.3f}" for x in p]))
+    print(f'===> total keep ratio: {(n_params * p).sum()/n_params.sum()}')
+    # assert (n_params * p).sum() == (1 - ratio) * n_params.sum()
 
     keep_masks = dict()
     i = 0
@@ -182,7 +188,7 @@ def random_ticket(net, L, ratio, vgg_scaling=False):
             keep_ratio = 0.3
             if isinstance(m, nn.Conv2d):
                 keep_ratio = p[i]
-            print(f'===> Layer {m}, keep ratio: {keep_ratio:.3f}')
+            print(f'===> Layer {m}, keep ratio: {keep_ratio*100:.2f}%')
             keep_n = int(keep_ratio * n_params[i])
 
             mask = torch.zeros_like(m.weight.data).flatten()

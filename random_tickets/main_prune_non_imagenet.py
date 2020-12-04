@@ -29,6 +29,7 @@ def init_config():
     parser.add_argument('--exception', type=int, nargs='*', default=[])
     
     parser.add_argument('--ratio', type=float, default=0.9)
+    parser.add_argument('--prune_last', type=bool, default=True)
 
     parser.add_argument('--run', type=str, default='')
     parser.add_argument('--pruning', type=str, default='grasp')
@@ -156,11 +157,16 @@ def main(args):
     else:
         raise NotImplementedError
 
+    if not args.prune_last:
+        for k in masks.keys():
+            if isinstance(k, nn.Linear):
+                masks[k] = torch.ones_like(masks[k])
+
     mb.register_mask(masks)
 
     # ========== save pruned network ============
     state = {
-        'net': mb.model,
+        'net': mb.model.state_dict(),
         'acc': -1,
         'epoch': -1,
         'args': args,
@@ -194,16 +200,16 @@ def main(args):
         logger.iter_info()
         logger.save()
 
+        state = {
+            'net': net.state_dict(),
+            'acc': test_acc,
+            'epoch': epoch,
+            'args': config,
+            'mask': mb.masks,
+            'ratio': mb.get_ratio_at_each_layer()
+        }
         torch.save(state, os.path.join(args.root, 'ckpt.tar'))
         if test_acc > best_acc:
-            state = {
-                'net': net,
-                'acc': test_acc,
-                'epoch': epoch,
-                'args': config,
-                'mask': mb.masks,
-                'ratio': mb.get_ratio_at_each_layer()
-            }
             torch.save(state, os.path.join(args.root, 'ckpt_best.tar'))
             best_acc = test_acc
             best_epoch = epoch

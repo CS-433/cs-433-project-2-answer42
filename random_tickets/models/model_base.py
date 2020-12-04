@@ -25,11 +25,11 @@ class ModelBase(object):
             if isinstance(m, (nn.Linear, nn.Conv2d)):
                 mask = self.masks.get(m, None)
                 if mask is not None:
-                    res[m] = (mask.sum() / mask.numel()).item() * 100
+                    res[str(m)] = (mask.sum() / mask.numel()).item() * 100
                     total += mask.numel()
                     remained += mask.sum().item()
                 else:
-                    res[m] = -100.0
+                    res[str(m)] = -100.0
                     total += m.weight.numel()
                     remained += m.weight.numel()
         res['ratio'] = remained/total * 100
