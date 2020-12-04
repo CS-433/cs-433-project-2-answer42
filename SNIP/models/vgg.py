@@ -16,9 +16,10 @@ class VGG(nn.Module):
     def __init__(self, num_channels, num_classes, depth, batch_norm=True, affine=False):
         if depth not in defaultcfg:
             raise ValueError('Unknown VGG config for depth', depth)
+        super(VGG, self).__init__()
         self.affine = affine
         config = defaultcfg[depth]
-        self.feature = make_layers(config, num_channels, batch_norm)
+        self.feature = self.make_layers(config, num_channels, batch_norm)
         self.fc = nn.Linear(config[-1], num_classes)
         self.apply(weights_init)
 
@@ -49,7 +50,7 @@ def vgg19(dataset):
     batch_norm = True
     affine = False
     NETS = {
-        'cifar10': lambda: VGG(3, 10, depth, batch_norm, affine)
+        'cifar10': lambda: VGG(3, 10, depth, batch_norm, affine),
         'cifar100': lambda: VGG(3, 100, depth, batch_norm, affine),
         'tinyimagenet': lambda: VGG(3, 200, depth, batch_norm, affine)
     }
