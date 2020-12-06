@@ -1,3 +1,5 @@
+import torch.nn as nn
+
 def get_fc_and_conv_layers(net):
     """Returns list of convolution and fully connected layers from the passed
     neural network
