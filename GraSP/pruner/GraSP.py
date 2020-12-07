@@ -7,6 +7,8 @@ import math
 import copy
 import types
 
+from corrupt_data import corrupt_dataloader
+
 
 def GraSP_fetch_data(dataloader, num_classes, samples_per_class):
     datas = [[] for _ in range(num_classes)]
@@ -46,7 +48,7 @@ def count_fc_parameters(net):
     return total
 
 
-def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25, num_iters=1, T=200, reinit=True):
+def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25, num_iters=1, T=200, reinit=True, corrupt_data=False):
     eps = 1e-10
     keep_ratio = 1-ratio
     old_net = net
@@ -71,6 +73,9 @@ def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_clas
     grad_w = None
     for w in weights:
         w.requires_grad_(True)
+        
+    if corrupt_data:
+        train_dataloader = corrupt_dataloader(train_dataloader, num_classes)
 
     print_once = False
     for it in range(num_iters):

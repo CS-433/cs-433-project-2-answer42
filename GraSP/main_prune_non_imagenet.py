@@ -271,7 +271,9 @@ def main(config):
         masks = GraSP(mb.model, ratio, trainloader, 'cuda',
                       num_classes=classes[config.dataset],
                       samples_per_class=config.samples_per_class,
-                      num_iters=config.get('num_iters', 1))
+                      num_iters=config.get('num_iters', 1), 
+                      corrupt_data=config.get('corrupt_data', False)
+                     )
         iteration = 0
         print('=> Using GraSP')
         # ========== register mask ==================
