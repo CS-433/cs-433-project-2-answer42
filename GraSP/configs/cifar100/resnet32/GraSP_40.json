@@ -1,5 +1,5 @@
 {
-  "exp_name": "cifar100_resnet32_GraSP_prune_ratio_995",
+  "exp_name": "cifar100_resnet32_GraSP_prune_ratio_85",
   "network": "resnet",
   "depth": 32,
   "dataset": "cifar100",
@@ -10,7 +10,7 @@
   "exception": "-1",
   "iterations": 1,
   "normalize": false,
-  "target_ratio": 0.995,
+  "target_ratio": 0.4,
   "pruner": "GraSP",
   "pruner_file": "GraSP",
   "samples_per_class": 5,
