@@ -272,7 +272,8 @@ def main(config):
                       num_classes=classes[config.dataset],
                       samples_per_class=config.samples_per_class,
                       num_iters=config.get('num_iters', 1), 
-                      corrupt_data=config.get('corrupt_data', False)
+                      corrupt_data=config.get('corrupt_data', False),
+                      layerwise_rearrange=config.get('layerwise_rearrange', False)
                      )
         iteration = 0
         print('=> Using GraSP')

@@ -8,7 +8,7 @@ import copy
 import types
 
 from corrupt_data import corrupt_dataloader
-
+from layerwise_rearrange import rearrange_tensor
 
 def GraSP_fetch_data(dataloader, num_classes, samples_per_class):
     datas = [[] for _ in range(num_classes)]
@@ -48,7 +48,7 @@ def count_fc_parameters(net):
     return total
 
 
-def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25, num_iters=1, T=200, reinit=True, corrupt_data=False):
+def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25, num_iters=1, T=200, reinit=True, corrupt_data=False, layerwise_rearrange=False):
     eps = 1e-10
     keep_ratio = 1-ratio
     old_net = net
@@ -158,6 +158,8 @@ def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_clas
     keep_masks = dict()
     for m, g in grads.items():
         keep_masks[m] = ((g / norm_factor) <= acceptable_score).float()
+        if layerwise_rearrange:
+            keep_masks[m] = rearrange_tensor(keep_masks[m])
 
     print(torch.sum(torch.cat([torch.flatten(x == 1) for x in keep_masks.values()])))
 
