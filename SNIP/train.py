@@ -51,6 +51,7 @@ def train(net, data_loader, optimizer, loss_fn, device):
         loss.backward()
         optimizer.step()
 
+
         loss_accumulator += loss
         dataset_size += y.size(0)
     accuracy = eval_net(net, data_loader, device)

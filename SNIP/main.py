@@ -21,7 +21,6 @@ def parse_args():
                         required=True, choices=['resnet32', 'vgg19'])
     parser.add_argument('--pruning_ratio', type=check_normalized, help='Percent of weights to prune (in range [0, 1])',
                         required=False, default=0)
-    parser.add_argument('--use_tpu', action='store_true', default=False)
     args = parser.parse_args()
     return args
 
@@ -31,8 +30,8 @@ def main(config):
         'resnet32': resnet32,
         'vgg19': vgg19
     }
-    BATCH_SIZE = 1024 if config.use_tpu else 64
-    NUM_WORKERS = 2
+    BATCH_SIZE = 64
+    NUM_WORKERS = 4
     datasets = {
         'cifar10': lambda: prepare_cifar10(training_batch_size=BATCH_SIZE, num_workers=NUM_WORKERS)
     }
@@ -45,13 +44,8 @@ def main(config):
                    int(config.epochs * 0.5): learning_rate * 0.1,
                    int(config.epochs * 0.75): learning_rate * 0.01}
     scheduler = PresetLRScheduler(lr_schedule)
-
-    if config.use_tpu:
-        import torch_xla
-        import torch_xla.core.xla_model as xm
-        device = xm.xla_device() # TPU support (long training time for small batches)
-    else:
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     print('Used device:', device)
 
