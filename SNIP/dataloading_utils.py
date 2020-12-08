@@ -18,5 +18,5 @@ def prepare_cifar10(training_batch_size, num_workers=2):
 
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=training_batch_size, 
         shuffle=True, num_workers=num_workers)
-    test_dataloader = torch.utils.data.DataLoader(test_data, batch_size=1000, shuffle=False, num_workers=num_workers)
+    test_dataloader = torch.utils.data.DataLoader(test_data, batch_size=1024, shuffle=False, num_workers=num_workers)
     return train_dataloader, test_dataloader
