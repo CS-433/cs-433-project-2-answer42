@@ -51,7 +51,7 @@ def init_logger(config):
     # set logger
     path = os.path.dirname(os.path.abspath(__file__))
     path_model = os.path.join(path, 'models/base/%s.py' % config.network.lower())
-    path_main = os.path.join(path, 'main_prune_non_imagenet.py')
+    path_main = os.path.join(path, 'main.py')
     path_pruner = os.path.join(path, 'pruner/%s.py' % config.pruner_file)
     logger = get_logger('log', logpath=config.summary_dir + '/',
                         filepath=path_model, package_files=[path_main, path_pruner])

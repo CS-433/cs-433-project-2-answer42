@@ -7,8 +7,8 @@ import math
 import copy
 import types
 
-from corrupt_data import corrupt_dataloader
-from layerwise_rearrange import rearrange_tensor
+from utils.corrupt_data import corrupt_dataloader
+from utils.layerwise_rearrange import rearrange_tensor
 
 def GraSP_fetch_data(dataloader, num_classes, samples_per_class):
     datas = [[] for _ in range(num_classes)]
