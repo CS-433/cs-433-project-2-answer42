@@ -2,7 +2,7 @@ import torch
 import torchvision
 from torchvision.transforms import transforms
 
-def prepare_cifar10(training_batch_size, num_workers=2):
+def load_cifar10():
     additional_train_transforms = [
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip()
@@ -15,9 +15,16 @@ def prepare_cifar10(training_batch_size, num_workers=2):
         transform=transforms.Compose(additional_train_transforms + test_transform_list), download=True)
     test_data = torchvision.datasets.CIFAR10('./cifar10', False, 
         transform=transforms.Compose(test_transform_list), download=True)
+    return train_data, test_data
 
-    train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=training_batch_size, 
-        shuffle=True, num_workers=num_workers)
-    test_dataloader = torch.utils.data.DataLoader(test_data, batch_size=1024, shuffle=False, 
-        num_workers=num_workers)
-    return train_dataloader, test_dataloader
+
+def split_features_and_labels(dataset):
+    features = [entry[0] for entry in dataset]
+    labels = [entry[1] for entry in dataset]
+    return features, labels
+
+
+def create_loader(data, batch_size, shuffle=True, num_workers=2):
+    dataloader = torch.utils.data.DataLoader(data, batch_size=batch_size, 
+        shuffle=shuffle, num_workers=num_workers)
+    return dataloader
