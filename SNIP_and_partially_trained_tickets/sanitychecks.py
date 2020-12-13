@@ -55,16 +55,19 @@ def layerwise_rearrange(masks):
     return [flat_shuffle(mask) for mask in masks]
 
 
-def layerwise_weights_shuffling(net):
-    """Returns a copy of the given network where 
-    weights of each prunable layer are shuffled
+def layerwise_weights_shuffling(net, make_copy=False):
+    """Shuffle weights of each prunable layer of the given
+    network
 
     Parameters
     ----------
     net : nn.Module
         Neural network
+    make_coopy : bool
+        Specifies whether a sanity check should be done directly on a network or a copy of it
     """
-    net = copy.deepcopy(net)
+    if make_copy:
+        net = copy.deepcopy(net)
     for layer in get_fc_and_conv_layers(net):
         layer.weight.data = flat_shuffle(layer.weight.data)
     return net
