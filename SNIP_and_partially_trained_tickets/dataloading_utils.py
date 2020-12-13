@@ -44,10 +44,12 @@ def create_loader(data, batch_size, shuffle=True, num_workers=2, half_dataset=Fa
     """Creates loader for the given dataset and the batch sampling parameters.
     Also takes an additional parameter that makes data loader that satisfies
     Half Dataset sanity check."""
-    sampler = None
     if half_dataset:
         indices_to_keep = torch.randperm(len(data))[:len(data) // 2]
         sampler = torch.utils.data.SubsetRandomSampler(indices=indices_to_keep)
-    dataloader = torch.utils.data.DataLoader(data, batch_size=batch_size, 
-        shuffle=shuffle, num_workers=num_workers, sampler=sampler)
+        dataloader = torch.utils.data.DataLoader(data, batch_size=batch_size, 
+            num_workers=num_workers, sampler=sampler)
+    else:
+        dataloader = torch.utils.data.DataLoader(data, batch_size=batch_size, 
+            num_workers=num_workers, shuffle=shuffle)
     return dataloader
