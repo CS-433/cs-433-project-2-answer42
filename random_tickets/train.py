@@ -14,6 +14,7 @@ import myexman
 import models
 import utils
 import pruner
+import numpy as np
 
 
 def init_config():
@@ -35,20 +36,12 @@ def init_config():
     parser.add_argument('--run', type=str, default='')
     parser.add_argument('--pruning', type=str, default='grasp')
 
+    parser.add_argument('--seed', type=int, default=0)
+
     # Grasp params
     parser.add_argument('--samples_per_class', type=int, default=10)
     args = parser.parse_args()
     return args
-
-def print_mask_information(mb, logger):
-    ratios = mb.get_ratio_at_each_layer()
-    print('** Mask information of %s. Overall Remaining: %.2f%%' % (mb.get_name(), ratios['ratio']))
-    count = 0
-    for k, v in ratios.items():
-        if k == 'ratio':
-            continue
-        print('  (%d) %s: Remaining: %.2f%%' % (count, k, v))
-        count += 1
 
 
 def train(net, loader, optimizer, criterion, lr_scheduler, epoch, logger):
@@ -107,10 +100,11 @@ def main(args):
     classes = {
         'cifar10': 10,
         'cifar100': 100,
-        'mnist': 10,
-        'tiny_imagenet': 200
     }
     logger = Logger('logs', base=args.root)
+
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
 
     # build model
     if args.network == 'vgg':
@@ -142,6 +136,8 @@ def main(args):
         masks = pruner.random_ticket(mb.model, depth, args.ratio, vgg_scaling=('vgg' in args.network))
     elif args.pruning == 'random-uniform':
         masks = pruner.random_ticket(mb.model, depth, args.ratio, vgg_scaling=('vgg' in args.network), uniform=True)
+    elif args.pruning == 'random-structured':
+        masks = pruner.random_ticket_structured(mb.model, depth, args.ratio, vgg_scaling=('vgg' in args.network))
     else:
         raise NotImplementedError
 
@@ -152,21 +148,12 @@ def main(args):
 
     mb.register_mask(masks)
 
-    # ========== save pruned network ============
     state = {
         'net': mb.model.state_dict(),
-        'acc': -1,
-        'epoch': -1,
-        'args': args,
         'mask': mb.masks,
-        'ratio': mb.get_ratio_at_each_layer()
     }
     torch.save(state, os.path.join(args.root, 'ckpt_init.tar'))
 
-    # ========== print pruning details ============
-    print_mask_information(mb, logger)
-
-    # ========== finetuning =======================
     criterion = nn.CrossEntropyLoss()
     learning_rate = 0.1
     optimizer = optim.SGD(net.parameters(), learning_rate, momentum=0.9, weight_decay=args.wd)
@@ -196,11 +183,7 @@ def main(args):
 
         state = {
             'net': net.state_dict(),
-            'acc': test_acc,
-            'epoch': epoch,
-            'args': config,
             'mask': mb.masks,
-            'ratio': mb.get_ratio_at_each_layer()
         }
         torch.save(state, os.path.join(args.root, 'ckpt.tar'))
         if test_acc > best_acc:
