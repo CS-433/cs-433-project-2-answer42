@@ -7,6 +7,7 @@ import torch
 
 from pprint import pprint
 from easydict import EasyDict as edict
+import numpy as np
 
 
 def get_logger(name, logpath, filepath, package_files=[],
@@ -154,6 +155,21 @@ class PresetLRScheduler(object):
         for param_group in optimizer.param_groups:
             lr = param_group['lr']
             return lr
+
+
+class LinearLR(torch.optim.lr_scheduler._LRScheduler):
+    def __init__(self, optimizer, num_epochs, last_epoch=-1):
+        self.num_epochs = max(num_epochs, 1)
+        super().__init__(optimizer, last_epoch)
+
+    def get_lr(self, *args):
+        res = []
+        for lr in self.base_lrs:
+            res.append(np.maximum(lr * np.minimum(-self.last_epoch * 1. / self.num_epochs + 1., 1.), 0.))
+        return res
+    
+    def __call__(self, *args):
+        self.step()
 
 
 # =======================================================

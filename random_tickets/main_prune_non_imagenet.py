@@ -22,6 +22,7 @@ def init_config():
 
     parser.add_argument('--epochs', type=int, default=160)
     parser.add_argument('--wd', type=float)
+    parser.add_argument('--lr_schedule', type=str, default='original')
 
     parser.add_argument('--network', type=str, default='vgg')
     parser.add_argument('--dataset', type=str, default='cifar10')
@@ -101,17 +102,6 @@ def test(net, loader, criterion, epoch, logger):
     return acc
 
 
-def get_exception_layers(net, exception):
-    exc = []
-    idx = 0
-    for m in net.modules():
-        if isinstance(m, (nn.Linear, nn.Conv2d)):
-            if idx in exception:
-                exc.append(m)
-            idx += 1
-    return tuple(exc)
-
-
 def main(args):
     # init logger
     classes = {
@@ -128,7 +118,7 @@ def main(args):
         depth = 19
     elif args.network == 'resnet':
         net = models.base.resnet(depth=32, dataset=args.dataset)
-        depth = 32
+        depth = 33
     else:
         raise NotImplementedError('Network unsupported')
 
@@ -138,10 +128,6 @@ def main(args):
     # preprocessing
     # ====================================== get dataloader ======================================
     trainloader, testloader = utils.data_utils.get_dataloader(args.dataset, args.batch_size, 1024, 4)
-    # ====================================== fetch exception ======================================
-    exception = get_exception_layers(mb.model, args.exception)
-    for idx, m in enumerate(exception):
-        print('  (%d) %s' % (idx, m))
 
     # ====================================== start pruning ======================================
     mb.model.apply(models.base.init_utils.weights_init)
@@ -154,6 +140,8 @@ def main(args):
             num_iters=1)
     elif args.pruning == 'random':
         masks = pruner.random_ticket(mb.model, depth, args.ratio, vgg_scaling=('vgg' in args.network))
+    elif args.pruning == 'random-uniform':
+        masks = pruner.random_ticket(mb.model, depth, args.ratio, vgg_scaling=('vgg' in args.network), uniform=True)
     else:
         raise NotImplementedError
 
@@ -185,7 +173,13 @@ def main(args):
     lr_schedule = {0: learning_rate,
                    int(args.epochs * 0.5): learning_rate * 0.1,
                    int(args.epochs * 0.75): learning_rate * 0.01}
-    lr_scheduler = utils.common_utils.PresetLRScheduler(lr_schedule)
+    if args.lr_schedule == 'original':
+        lr_scheduler = utils.common_utils.PresetLRScheduler(lr_schedule)
+    elif args.lr_schedule == 'linear':
+        lr_scheduler = utils.common_utils.LinearLR(optimizer, args.epochs)
+    else:
+        raise NotImplementedError
+
     best_acc = 0
     best_epoch = 0
     t0 = time.time()
