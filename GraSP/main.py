@@ -3,6 +3,7 @@ import json
 import math
 import os
 import sys
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -35,13 +36,15 @@ def init_config():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, required=True)
     parser.add_argument('--run', type=str, default='')
+    parser.add_argument('--seed', default=0, type=int, help='seed for initializing training. ')
     args = parser.parse_args()
     runs = None
     if len(args.run) > 0:
         runs = args.run
-    config = process_config(args.config, runs)
+    seed = args.seed
+    config = process_config(args.config, runs, seed)
 
-    return config
+    return config, seed
 
 
 def init_logger(config):
@@ -61,6 +64,9 @@ def init_logger(config):
     # sys.stderr = open(os.path.join(config.summary_dir, 'stderr.txt'), 'w+')
     return logger, writer
 
+def init_state(seed):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
 def print_mask_information(mb, logger):
     ratios = mb.get_ratio_at_each_layer()
@@ -318,5 +324,6 @@ def main(config):
 
 
 if __name__ == '__main__':
-    config = init_config()
+    config, seed = init_config()
+    init_state(seed)
     main(config)
