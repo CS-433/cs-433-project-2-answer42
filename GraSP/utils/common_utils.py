@@ -62,7 +62,7 @@ def get_config_from_json(json_file):
     return config, config_dict
 
 
-def process_config(json_file, runs=None):
+def process_config(json_file, runs=None, seed=None):
     """Process a json file into a config file.
     Where we can access the value using .xxx
     Note: we will need to create a similar directory as the config file.
@@ -75,6 +75,9 @@ def process_config(json_file, runs=None):
     if runs is not None:
         summn.append('run_%s' % runs)
         chekn.append('run_%s' % runs)
+    if seed is not None:
+        summn.append('_seed_%s' % str(seed))
+        chekn.append('_seed_%s' % str(seed))
     summn.append("summary/")
     chekn.append("checkpoint/")
     summary_dir = ["./runs/pruning"] + paths + summn
