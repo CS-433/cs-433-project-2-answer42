@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 import copy
 import types
@@ -94,4 +95,70 @@ def magnitude_pruning(net, keep_ratio):
     for weight_magnitude in weights_abs:
         keep_masks.append((weight_magnitude >= acceptable_score).float())
 
+    return keep_masks
+
+
+def calculate_smart_ratios(net, L, ratio, vgg_scaling=False, last_ratio=0.3, uniform=False):
+    """Calculate smart ratio for each layer of the given network with respect to the passed parameters
+
+    Parameters
+    ----------
+    net : nn.Module
+        Neural network
+    L : int
+
+    ratio : float
+        Percentage of weights to prune (sparsity ratio)
+    vgg_scaling : bool
+        Indicate whether the architecture of the network is VGG as it uses special scaling
+    last_ratio : float
+        Keep ratio of the last, linear, layer
+    uniform : bool
+    """
+    prunable_layers = get_fc_and_conv_layers(net)
+
+    n_params = np.array([m.weight.shape.numel() for m in prunable_layers])
+
+    p = np.arange(1, n_params.shape[0] + 1).astype(float)
+    if vgg_scaling:
+        p = ((L - p + 1)**2 + (L - p + 1)) / p**2
+    else:
+        p = (L - p + 1)**2 + (L - p + 1)
+    
+    if uniform:
+        p = p*0 + 1
+
+    p /= ((p * n_params) / ((1 - ratio) * n_params.sum() - last_ratio * n_params[-1])).sum()
+    p[-1] = last_ratio
+    print(f'===> smart ratios before rearanging:', ', '.join([f"{x:.3f}" for x in p]))
+    for i in range(len(p)):
+        if p[i] > 1.:
+            p[i + 1] = p[i+1] + (p[i] - 1) * n_params[i] / n_params[i+1]
+            p[i] = 1
+    print(f'===> smart ratios:', ', '.join([f"{x:.3f}" for x in p]))
+    print(f'===> total keep ratio: {(n_params * p).sum()/n_params.sum()}')
+    return p.tolist()
+
+
+def hybrid_tickets(net, keep_ratio, L, vgg_scaling=False):
+    """Calculates pruning mask for the given network using hybrid tickets approach
+
+    Parameters
+    ----------
+    net : nn.Module
+        Neural network
+    keep_ratio : float
+        Percent of weights to keep
+    L : int
+
+    vgg_scaling : bool
+        Indicate whether the architecture of the network is VGG as it uses special scaling
+    """
+    keep_masks = []
+    smart_keep_ratios = calculate_smart_ratios(
+        net, L, 1 - keep_ratio, vgg_scaling=vgg_scaling)
+    for layer, layer_keep_ratio in zip(get_fc_and_conv_layers(net), smart_keep_ratios):
+        # magnitude pruning returns a single array mask for a layer passed as a neural net
+        current_layer_mask = magnitude_pruning(layer, layer_keep_ratio)[0]
+        keep_masks.append(current_layer_mask)
     return keep_masks

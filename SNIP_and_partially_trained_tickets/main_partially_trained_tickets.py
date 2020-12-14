@@ -6,10 +6,10 @@ import os
 
 from schedulers import PresetLRScheduler
 from train import train, eval_net
-from pruning import magnitude_pruning
+from pruning import magnitude_pruning, hybrid_tickets
 from pruning_utils import apply_masks
 from argparse_utils import check_normalized, check_positive
-from pipeline_config import supported_architectures, NUM_WORKERS, TEST_BATCH_SIZE, TRAINING_BATCH_SIZE, datasets
+from pipeline_config import supported_architectures, NUM_WORKERS, TEST_BATCH_SIZE, TRAINING_BATCH_SIZE, datasets, SMART_RATIO_CONFIG
 from dataloading_utils import create_loader
 
 import sanitychecks
@@ -57,6 +57,7 @@ def parse_args():
                         choices=supported_architectures_list, required=True)
     parser.add_argument('--pruning_ratio', type=check_normalized, help='Percent of weights to prune (in range [0, 1])',
                         required=False, default=0)
+    parser.add_argument('--hybrid_tickets', action='store_true')
     parser.add_argument('--rewind_epoch', type=check_positive, help='Epoch to rewind values to', default=None)
     parser.add_argument('--rewinding_type', type=str, choices=['weights', 'learning_rate'], default=None)
     parser.add_argument('--load_model', type=str, default=None, 
@@ -135,7 +136,11 @@ def main(config):
         keep_ratio = 1. - config.pruning_ratio     
         print(f' => Pruning (keeping {keep_ratio * 100:.1f}% weights)')
         net.to(device)
-        masks = magnitude_pruning(net, keep_ratio=keep_ratio)
+        if config.hybrid_tickets:
+            ratio_config = SMART_RATIO_CONFIG[config.architecture]
+            masks = hybrid_tickets(net, keep_ratio, ratio_config['L'], ratio_config['vgg_scaling'])
+        else:
+            masks = magnitude_pruning(net, keep_ratio=keep_ratio)
         pruned_network = rewind_net if 'weights' == config.rewinding_type else net
         pruned_network.to(device)
         # Order of whether we apply weight shuffling or apply mask doesn't matter,

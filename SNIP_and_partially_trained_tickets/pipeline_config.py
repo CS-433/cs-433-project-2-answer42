@@ -18,3 +18,13 @@ datasets = {
         'num_classes': 100
     }
 }
+SMART_RATIO_CONFIG = {
+    'resnet32': {
+        'L': 33,
+        'vgg_scaling': False
+    },
+    'vgg19': {
+        'L': 19,
+        'vgg_scaling': True
+    }
+}
