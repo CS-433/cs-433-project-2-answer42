@@ -160,7 +160,7 @@ def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_clas
     return keep_masks
 
 
-def random_ticket(net, L, ratio, vgg_scaling=False, last_ratio=0.3):
+def random_ticket(net, L, ratio, vgg_scaling=False, last_ratio=0.3, uniform=False):
     old_net = net
     n_params = np.array([m.weight.shape.numel() for m in net.modules() if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear)])
 
@@ -169,6 +169,9 @@ def random_ticket(net, L, ratio, vgg_scaling=False, last_ratio=0.3):
         p = ((L - p + 1)**2 + (L - p + 1)) / p**2
     else:
         p = (L - p + 1)**2 + (L - p + 1)
+    
+    if uniform:
+        p = p*0 + 1
 
     p /= ((p * n_params) / ((1 - ratio) * n_params.sum() - last_ratio * n_params[-1])).sum()
     p[-1] = last_ratio
