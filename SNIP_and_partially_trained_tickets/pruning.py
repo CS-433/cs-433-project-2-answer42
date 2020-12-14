@@ -67,3 +67,31 @@ def SNIP(net, keep_ratio, train_dataloader, device, loss_fn):
     #print(torch.sum(torch.cat([torch.flatten(x == 1) for x in keep_masks])))
 
     return(keep_masks)
+
+
+def magnitude_pruning(net, keep_ratio):
+    """Prunes the given network such that only keep_ratio percent of
+    weights with the highest magnitude remains unpruned. The 
+    result is a list of masks, one of each "prunable" layer in the network
+    in the order these layers appear given by nn.Module.modules() method
+
+    Parameters
+    ----------
+    net : nn.Module
+        Neural network
+    keep_ratio : float
+        A number between 0 and 1 that indicates a percent of weight to keep
+    """
+    weights_abs = [torch.abs(layer.weight.data) for layer in get_fc_and_conv_layers(net)]
+
+    all_weights = torch.cat([torch.flatten(x) for x in weights_abs])
+
+    num_weights_to_keep = int(len(all_weights) * keep_ratio)
+    threshold, _ = torch.topk(all_weights, num_weights_to_keep, sorted=True)
+    acceptable_score = threshold[-1]
+
+    keep_masks = []
+    for weight_magnitude in weights_abs:
+        keep_masks.append((weight_magnitude >= acceptable_score).float())
+
+    return keep_masks
