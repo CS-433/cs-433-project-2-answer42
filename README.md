@@ -14,7 +14,7 @@ win the jackpot, 2020.](https://arxiv.org/pdf/2009.11094v1.pdf)
 
 ### Reproduce ResNet32/VGG19 on CIFAR10 with GraSP pruning:
 
-Run from GraSP folder:
+Run from GraSP directory:
 
 ```cd GraSP```
 
@@ -32,6 +32,9 @@ Several examples:
 
 ```python main.py --config configs/cifar10/vgg19/GraSP_98_rearrange.json```
 
+Checkout experiments logs: ```GraSP/runs/pruning/cifar10/vgg19/...```
+
 Code is based on the initial [GraSP repo](https://github.com/alecwangcq/GraSP)
 
 GraSP paper: [Picking Winning Tickets Before Training by Preserving Gradient Flow](https://openreview.net/forum?id=SkgsACVKPH)
+
