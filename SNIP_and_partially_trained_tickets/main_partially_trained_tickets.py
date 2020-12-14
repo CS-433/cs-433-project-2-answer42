@@ -1,6 +1,7 @@
 import argparse
 import torch
 import torch.nn as nn
+import numpy as np
 import copy
 import os
 
@@ -66,6 +67,7 @@ def parse_args():
                         default=0)
     parser.add_argument('--save_model', type=str, default=None, 
                         help='Save a trained model on specified path after training')
+    parser.add_argument('--seed', type=int, default=None)
     parser.add_argument('-sc', '--sanity_checks', type=str, nargs='*', choices=[
         'half_dataset',
         'layerwise_weights_shuffling'
@@ -75,6 +77,11 @@ def parse_args():
 
 
 def main(config):
+    if config.seed is not None:
+        print(f' => Using seed {config.seed}')
+        torch.manual_seed(config.seed)
+        np.random.seed(config.seed)
+
     config.sanity_checks = set(config.sanity_checks if config.sanity_checks else [])
 
     # Prepare training parameters
@@ -133,6 +140,10 @@ def main(config):
     if config.fine_tuning_epochs > 0:
         if config.rewinding_type is None:
             raise ValueError('Rewind type must be provided when doing pruning') 
+        # Set seed again as these pretraining and fine tuning parts might be run independently
+        if config.seed is not None:
+            torch.manual_seed(config.seed)
+            np.random.seed(config.seed)
         keep_ratio = 1. - config.pruning_ratio     
         print(f' => Pruning (keeping {keep_ratio * 100:.1f}% weights)')
         net.to(device)
