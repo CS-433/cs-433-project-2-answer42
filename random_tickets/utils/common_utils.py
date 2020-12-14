@@ -1,90 +1,6 @@
 import os
-import time
-import json
-import logging
-
 import torch
-
-from pprint import pprint
-from easydict import EasyDict as edict
 import numpy as np
-
-
-def get_logger(name, logpath, filepath, package_files=[],
-               displaying=True, saving=True):
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
-    log_path = logpath + name + time.strftime("-%Y%m%d-%H%M%S")
-    makedirs(log_path)
-    if saving:
-        info_file_handler = logging.FileHandler(log_path)
-        info_file_handler.setLevel(logging.INFO)
-        logger.addHandler(info_file_handler)
-    logger.info(filepath)
-    with open(filepath, 'r') as f:
-        logger.info(f.read())
-
-    for f in package_files:
-        logger.info(f)
-        with open(f, 'r') as package_f:
-            logger.info(package_f.read())
-    if displaying:
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
-        logger.addHandler(console_handler)
-
-    return logger
-
-
-def makedirs(filename):
-    if not os.path.exists(os.path.dirname(filename)):
-        os.makedirs(os.path.dirname(filename))
-
-
-def str_to_list(src, delimiter, converter):
-    """Conver a string to list.
-    """
-    src_split = src.split(delimiter)
-    res = [converter(_) for _ in src_split]
-    return res
-
-
-def get_config_from_json(json_file):
-    """
-    Get the config from a json file
-    :param json_file:
-    :return: config(namespace) or config(dictionary)
-    """
-    # parse the configurations from the config json file provided
-    with open(json_file, 'r') as config_file:
-        config_dict = json.load(config_file)
-    config = edict(config_dict)
-
-    return config, config_dict
-
-
-def process_config(json_file, runs=None):
-    """Process a json file into a config file.
-    Where we can access the value using .xxx
-    Note: we will need to create a similar directory as the config file.
-    """
-    config, _ = get_config_from_json(json_file)
-    paths = json_file.split('/')[1:-1]
-
-    summn = [config.exp_name]
-    chekn = [config.exp_name]
-    if runs is not None:
-        summn.append('run_%s' % runs)
-        chekn.append('run_%s' % runs)
-    summn.append("summary/")
-    chekn.append("checkpoint/")
-    summary_dir = ["/scratch/izar/atanov/ml-proj2/logs/grasp/runs/pruning/"] + paths + summn
-    ckpt_dir = ["/scratch/izar/atanov/ml-proj2/logs/grasp/runs/pruning/"] + paths + chekn
-    config.summary_dir = os.path.join(*summary_dir)
-    config.checkpoint_dir = os.path.join(*ckpt_dir)
-    print("=> config.summary_dir:    %s" % config.summary_dir)
-    print("=> config.checkpoint_dir: %s" % config.checkpoint_dir)
-    return config
 
 
 def try_contiguous(x):
@@ -100,16 +16,6 @@ def try_cuda(x):
     return x
 
 
-def tensor_to_list(tensor):
-    if len(tensor.shape) == 1:
-        return [tensor[_].item() for _ in range(tensor.shape[0])]
-    else:
-        return [tensor_to_list(tensor[_]) for _ in range(tensor.shape[0])]
-
-
-# =====================================================
-# For learning rate schedule
-# =====================================================
 class StairCaseLRScheduler(object):
     def __init__(self, start_at, interval, decay_rate):
         self.start_at = start_at
@@ -172,15 +78,3 @@ class LinearLR(torch.optim.lr_scheduler._LRScheduler):
         self.step()
 
 
-# =======================================================
-# For math computation
-# =======================================================
-def prod(l):
-    val = 1
-    if isinstance(l, list):
-        for v in l:
-            val *= v
-    else:
-        val = val * l
-
-    return val
