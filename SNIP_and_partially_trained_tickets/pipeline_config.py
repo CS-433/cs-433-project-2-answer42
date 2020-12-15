@@ -1,5 +1,5 @@
 from models import resnet32, vgg19
-from dataloading_utils import load_cifar10, load_cifar100, create_loader, split_features_and_labels
+from utils.dataloading_utils import load_cifar10, load_cifar100, create_loader, split_features_and_labels
 
 supported_architectures = {
     'resnet32': resnet32,

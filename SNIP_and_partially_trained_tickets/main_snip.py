@@ -1,14 +1,15 @@
 import argparse
 import torch
 import torch.nn as nn
+import numpy as np
 
 from schedulers import PresetLRScheduler
 from train import train, eval_net
 from pruning import SNIP
-from pruning_utils import apply_masks
-from argparse_utils import check_normalized, check_positive
+from utils.argparse_utils import check_normalized, check_positive
 from pipeline_config import supported_architectures, NUM_WORKERS, TEST_BATCH_SIZE, TRAINING_BATCH_SIZE, datasets
-from dataloading_utils import create_loader
+from utils.dataloading_utils import create_loader, split_features_and_labels
+from utils.pruning_utils import calculate_network_sparsity_ratio, apply_masks
 
 import sanitychecks
 
@@ -27,6 +28,7 @@ def parse_args():
                         required=True, choices=supported_architectures_list)
     parser.add_argument('--pruning_ratio', type=check_normalized, help='Percent of weights to prune (in range [0, 1])',
                         required=False, default=0)
+    parser.add_argument('--seed', type=int, default=None)
     parser.add_argument('-sc', '--sanity_checks', type=str, nargs='*', choices=[
         'random_labels', 
         'random_pixels',
@@ -37,7 +39,13 @@ def parse_args():
 
 
 def main(config):
-        
+    print(config.__dict__)
+    exit(0)
+    if config.seed is not None:
+        print(f' => Using seed {config.seed}')
+        torch.manual_seed(config.seed)
+        np.random.seed(config.seed)
+
     config.sanity_checks = set(config.sanity_checks if config.sanity_checks else [])
 
     net = supported_architectures[config.architecture](config.dataset)
@@ -87,12 +95,18 @@ def main(config):
         print(' *** Layerwise rearrange done')
     apply_masks(net, masks)
 
+    net_sparsity_ratio = calculate_network_sparsity_ratio(net)
+    print(f' => Sparsity ratio before training {net_sparsity_ratio}')
+
     for i in range(config.epochs):
         print(f'Epoch {i}', end='')
         scheduler(optimizer, i)
         train_loss, train_acc = train(net, train_loader, optimizer, loss, device)    
         test_acc = eval_net(net, test_loader, device)
         print(f': loss {train_loss:.7f}, train_acc {train_acc * 100:.2f}%, test_acc {test_acc * 100:.2f}%')
+
+    net_sparsity_ratio = calculate_network_sparsity_ratio(net)
+    print(f' => Sparsity ratio after training {net_sparsity_ratio}')
 
 
 if __name__ == "__main__":

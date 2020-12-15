@@ -8,10 +8,10 @@ import os
 from schedulers import PresetLRScheduler
 from train import train, eval_net
 from pruning import magnitude_pruning, hybrid_tickets
-from pruning_utils import apply_masks
-from argparse_utils import check_normalized, check_positive
+from utils.pruning_utils import apply_masks
+from utils.argparse_utils import check_normalized, check_positive
 from pipeline_config import supported_architectures, NUM_WORKERS, TEST_BATCH_SIZE, TRAINING_BATCH_SIZE, datasets, SMART_RATIO_CONFIG
-from dataloading_utils import create_loader
+from utils.dataloading_utils import create_loader
 
 import sanitychecks
 

@@ -1,6 +1,6 @@
 import torch
 import copy
-from pruning_utils import get_fc_and_conv_layers
+from utils.pruning_utils import get_fc_and_conv_layers
 
 def shuffle(tensor):
     """Shuffles tensor

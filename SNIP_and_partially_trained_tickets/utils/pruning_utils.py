@@ -52,4 +52,18 @@ def apply_masks(net, pruning_masks):
         layer.weight.register_hook(hook_factory(mask))
         
 
-        
+def calculate_network_sparsity_ratio(net):
+    """Calculate percent of the pruned weights in the network
+
+    Parameters
+    ----------
+    net : nn.Module
+        Neural network
+    """
+    zero_weight_count = 0.
+    total_weight_count = 0.
+    for layer in get_fc_and_conv_layers(net):
+        w = layer.weight.data
+        zero_weight_count += (w == 0.).float().sum()
+        total_weight_count += w.numel()
+    return zero_weight_count / total_weight_count
