@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import time
-from tqdm import tqdm
 
 from logger import Logger
 import myexman

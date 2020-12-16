@@ -1,6 +1,5 @@
 import torch.nn as nn
 from collections import OrderedDict
-from utils.network_utils import get_network
 from utils.prune_utils import filter_weights
 
 
@@ -12,8 +11,6 @@ class ModelBase(object):
         self._dataset = dataset
         self.model = model
         self.masks = None
-        if self.model is None:
-            self.model = get_network(network, depth, dataset)
 
     def get_ratio_at_each_layer(self):
         assert self.masks is not None, 'Masks should be generated first.'
