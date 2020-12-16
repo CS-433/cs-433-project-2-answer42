@@ -39,8 +39,6 @@ def parse_args():
 
 
 def main(config):
-    print(config.__dict__)
-    exit(0)
     if config.seed is not None:
         print(f' => Using seed {config.seed}')
         torch.manual_seed(config.seed)
