@@ -154,19 +154,19 @@ All the results for partially-trained tickets are obtained using seed **2020**.
 
 ##### Examples of usage:
 
-* **CIFAR-10, VGG19, Pre-trained for 160 epochs on half dataset, pruned 98% of weights, rewinded to the 40th epoch using weight rewinding and fine-tuned for additional 160 epochs**
+* **CIFAR-10, VGG19, Pre-trained for 160 epochs on half dataset, pruned 98% of weights, rewinded to the 40th epoch using weight rewinding and retrained for additional 160 epochs**
 
 ```(bash)
 python main_partially_trained_tickets.py --dataset cifar10 --architecture vgg19 --epochs 160 --rewind_epoch 40 --fine_tuning_epochs 160 --pruning_ratio 0.98 --seed 2020 --rewinding_type weights -sc half_dataset
 ```
 
-* **CIFAR-100, ResNet32, Pre-trained for 160 epochs on half dataset, pruned using hybrid tickets 95% of weights and rewinded to the 40th epoch using learning rate rewinding and fine-tuned for additional 160 epochs**
+* **CIFAR-100, ResNet32, Pre-trained for 160 epochs, pruned using hybrid tickets 95% of weights and rewinded to the 40th epoch using learning rate rewinding and retrained for additional 160 epochs**
 
 ```(bash)
-python main_partially_trained_tickets.py --dataset cifar10 --architecture vgg19 --epochs 160 --rewind_epoch 40 --fine_tuning_epochs 160 --pruning_ratio 0.95 --hybrid_tickets --seed 2020 --rewinding_type learning_rate
+python main_partially_trained_tickets.py --dataset cifar100 --architecture resnet32 --epochs 160 --rewind_epoch 40 --fine_tuning_epochs 160 --pruning_ratio 0.95 --hybrid_tickets --seed 2020 --rewinding_type learning_rate
 ```
 
-* **CIFAR-100, ResNet32, Pre-trained for 160 epochs on half dataset, pruned 90% of weights, performed layerwise weight shuffling and rewinded to the 40th epoch using learning rate rewinding and fine-tuned for additional 160 epochs**
+* **CIFAR-100, ResNet32, Pre-trained for 160 epochs, pruned 90% of weights, performed layerwise weight shuffling and rewinded to the 40th epoch using learning rate rewinding and retrained for additional 160 epochs**
 
 ```(bash)
 python main_partially_trained_tickets.py --dataset cifar100 --architecture resnet32 --epochs 160 --rewind_epoch 40 --fine_tuning_epochs 160 --pruning_ratio 0.9 --seed 2020 --rewinding_type learning_rate -sc layerwise_weights_shuffling
