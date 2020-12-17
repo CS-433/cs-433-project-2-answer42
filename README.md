@@ -2,7 +2,7 @@
 
 # Paper to reproduce
 
-[Sanity-checking pruning methods: Random tickets canwin the jackpot](https://arxiv.org/pdf/2009.11094v1.pdf) 
+[Sanity-checking pruning methods: Random tickets can win the jackpot](https://arxiv.org/pdf/2009.11094v1.pdf) 
 Jingtong Su, Yihang Chen, Tianle Cai, Tianhao Wu, Ruiqi Gao, Liwei Wang,and Jason D. Lee.
 
 # Usage
