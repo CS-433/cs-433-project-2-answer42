@@ -78,6 +78,8 @@ python main_snip.py --dataset cifar10 --architecture vgg19 --epochs 160 --prunin
 python main_snip.py --dataset cifar10 --architecture vgg19 --epochs 160 --pruning_ratio 0.98 --seed 2020 -sc layerwise_rearrange
 ```
 
+***Training logs for partially-trained tickets can be found in directory*** `SNIP_and_partially_trained_tickets/training_logs/SNIP/<cifar10|cifar100>`
+
 ## Random Tickets
 
 
@@ -171,6 +173,8 @@ python main_partially_trained_tickets.py --dataset cifar100 --architecture resne
 ```(bash)
 python main_partially_trained_tickets.py --dataset cifar100 --architecture resnet32 --epochs 160 --rewind_epoch 40 --fine_tuning_epochs 160 --pruning_ratio 0.9 --seed 2020 --rewinding_type learning_rate -sc layerwise_weights_shuffling
 ```
+
+***Training logs for partially-trained tickets can be found in directory*** `SNIP_and_partially_trained_tickets/training_logs/partially_trained_tickets/<hybrid_tickets|learning_rate_rewinding>`
 
 ## Authors
 
