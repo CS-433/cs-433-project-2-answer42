@@ -171,3 +171,9 @@ python main_partially_trained_tickets.py --dataset cifar100 --architecture resne
 ```(bash)
 python main_partially_trained_tickets.py --dataset cifar100 --architecture resnet32 --epochs 160 --rewind_epoch 40 --fine_tuning_epochs 160 --pruning_ratio 0.9 --seed 2020 --rewinding_type learning_rate -sc layerwise_weights_shuffling
 ```
+
+## Authors
+
+* Andrei Atanov: andrei.atanov@epfl.ch
+* Valentina Shumovskaia: valentina.shumovskaia@epfl.ch
+* Miloš Vujasinović: milos.vujasinovic@epfl.ch
